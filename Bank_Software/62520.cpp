@@ -3,7 +3,6 @@
 #include <vector>
 #include <fstream>
 #include <regex>
-#include <cmath>
 
 using namespace std;
 
@@ -46,38 +45,51 @@ void CreateUser(vector<User> &Users, string username, string password)
 	newUser.set_password(password);
 	Users.push_back(newUser);
 }
-//Getting username and password from .txt info
-string GetUsernameTxtInfo(string userInfo)
+//Getting username and password from fileInfo
+string GetUsernameFile(string userInfo)
 {
 	smatch match;
 	const string REG_STRING = "(?=username:).+(?=_password:)";
 	regex reg(REG_STRING);
-	regex_search(userInfo,match,reg);
+	regex_search(userInfo, match, reg);
 
-	string username = match.str().substr(9, match.str().size() - 9);
+	string username = match.str().substr(9, match.size() - 9);
 	return username;
 }
-string GetPasswordTxtInfo(string userInfo)
+string GetPasswordFile(string userInfo)
 {
 	smatch match;
 	const string REG_STRING = "(?=_password:).+";
 	regex reg(REG_STRING);
 	regex_search(userInfo, match, reg);
 
-	string password = match.str().substr(10, match.str().size() - 10);
+	string password = match.str().substr(10, match.size() - 10);
 
-	string password = match.str();
 	return password;
 }
-//Add username and password to .txt file
-void AddUserToTxtFile(User user, string txtFileName)
+//Add username and password to file
+void AddUserFile(User user, string fileName)
 {
-	fstream txtFile(txtFileName);
-	if (txtFile.is_open())
+	fstream file(fileName);
+	if (file.is_open())
 	{
-		txtFile << "username:" + user.get_username() + "_password:" + user.get_password() << endl;
+		file << "username:" + user.get_username() + "_password:" + user.get_password() << endl;
 	}
-	txtFile.close();
+}
+//Add all usernames and passwords to file
+void AddAllUsersFile(vector<User> Users, string fileName)
+{
+	fstream file(fileName);
+	if (file.is_open())
+	{
+		if (file.is_open())
+		{
+			for (User user : Users)
+			{
+				AddUserFile(user, fileName);
+			}
+		}
+	}
 }
 //Showing username and password of all users(debug)
 void ShowUsersInfo(vector<User> Users)
@@ -92,14 +104,16 @@ int main()
 {
 	vector<User> Users;
 
-	string txtInfo;
-	string txtName = "users.txt";
-	fstream txtFile(txtName);
-	if (txtFile.is_open())
+	string fileInfo;
+	string fileName = "users.txt";
+	fstream file(fileName);
+
+	//Get info from file
+	if (file.is_open())
 	{
-		while (getline(txtFile, txtInfo))
+		while (getline(file, fileInfo))
 		{
-			CreateUser(Users, GetUsernameTxtInfo(txtInfo), GetPasswordTxtInfo(txtInfo));
+			CreateUser(Users, GetUsernameFile(fileInfo), GetPasswordFile(fileInfo));
 		}
 	}
 	else
@@ -108,6 +122,8 @@ int main()
 	}
 
 	ShowUsersInfo(Users);
-	txtFile.close();
+	AddAllUsersFile(Users, fileName);
+
+	file.close();
 	return 0;
 }
