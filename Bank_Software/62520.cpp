@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <sstream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -37,7 +38,6 @@ string User::get_password(void)
 {
 	return password;
 }
-
 //Convert to Hex
 string ToHex(unsigned int input)
 {
@@ -96,6 +96,18 @@ string GetPasswordFile(string userInfo)
 
 	return password;
 }
+//Is username valid
+bool IsUsernameValid(string userInfo)
+{
+	bool answ = true;
+	return answ;
+}
+//Is password valid
+bool IsPasswordValid(string userInfo)
+{
+	bool answ = true;
+	return answ;
+}
 //Add username and password to file
 void AddUserFile(User user, string fileName)
 {
@@ -129,6 +141,147 @@ void ShowUsersInfo(vector<User> Users)
 	}
 }
 
+bool IsThisAccInUsers(vector<User> Users, string username)
+{
+	bool answ = false;
+
+	for (int i = 0; i < Users.size(); i++)
+	{
+		if (Users[i].get_username() == username)
+		{
+			answ = true;
+			break;
+		}
+	}
+
+	return answ;
+}
+void LogIn(vector<User> Users, string &clientUsername, string &clientPassword)
+{
+	string username = "";
+	string password = "";
+	cout << "Enter your username: ";
+	cin >> username;
+	cout << "Enter your password: ";
+	cin >> password;
+	cout << endl;
+
+	User thisUser;
+	for (int i = 0; i < Users.size(); i++)
+	{
+		if (Users[i].get_username() == username)
+		{
+			thisUser = Users[i];
+			break;
+		}
+	}
+
+	while (IsThisAccInUsers(Users, username) == false || thisUser.get_password() != password)
+	{
+		if (IsThisAccInUsers(Users, username) == false && thisUser.get_password() == password)
+		{
+			cout << "There is no such user with this username. Try again!" << endl;
+			cout << "Enter your username: ";
+			//getline(cin, username);
+			cin >> username;
+			cout << "Enter your password: ";
+			//getline(cin, password);
+			cin >> password;
+		}
+		else if (IsThisAccInUsers(Users, username) == true && thisUser.get_password() != password)
+		{
+			cout << "Wrong password. Try again!" << endl;
+			cout << "Enter your username: ";
+			//getline(cin, username);
+			cin >> username;
+			cout << "Enter your password: ";
+			//getline(cin, password);
+			cin >> password;
+		}
+	}
+
+	clientUsername = username;
+	clientPassword = password;
+
+	system("cls");
+	cout << "You have successfully logged in!" << endl;
+	cout << endl;
+}
+void Register(vector<User> Users, string& clientUsername, string& clientPassword)
+{
+	string username = "";
+	string password = "";
+
+	cout << "Enter your username: ";
+	cin >> username;
+	cout << "Enter your password: ";
+	cin >> password;
+	cout << endl;
+
+	while (IsThisAccInUsers(Users, username) == true)
+	{
+		cout << "Someone else has already used this username, try again." << endl;
+		cout << "Enter your username: ";
+		//getline(cin, username);
+		cin >> username;
+		cout << "Enter your password: ";
+		//getline(cin, password);
+		cin >> password;
+	}
+
+	clientUsername = username;
+	clientPassword = password;
+
+	system("cls");
+	cout << "You have successfully registered!" << endl;
+	cout << endl;
+}
+void Quit(vector<User> Users, string fileName)
+{
+	AddAllUsersFile(Users, fileName);
+	system("cls");
+	cout << "We at FMI Bank know you had many options to choose from, we thank you for choosing us!" << endl;
+	exit(EXIT_FAILURE);
+}
+void StartMenu(vector<User> Users, string &clientUsername, string &clientPassword, string fileName)
+{
+	system("cls");
+
+	cout << "Hello to FMI Bank!" << endl;
+	cout << endl;
+	cout << "Select one of 3 options:" << endl;
+	cout << "-type L to log in in your account" << endl;
+	cout << "-type R to register in our bank" << endl;
+	cout << "-type Q to quit" << endl;
+	cout << "Type here: ";
+	cout << endl;
+
+	string clientOption;
+	cin >> clientOption;
+
+	if (clientOption != "L" && clientOption != "R" && clientOption != "Q")
+	{
+		while (clientOption != "L" && clientOption != "R" && clientOption != "Q")
+		{
+			cout << "Sorry, but you have entered invalid input, please try again: ";
+			cin >> clientOption;
+		}
+	}
+
+	if (clientOption == "L")
+	{
+		LogIn(Users, clientUsername, clientPassword);
+	}
+	else if (clientOption == "R")
+	{
+		Register(Users, clientUsername, clientPassword);
+	}
+	else if (clientOption == "Q")
+	{
+		Quit(Users, fileName);
+	}
+}
+
 int main()
 {
 	vector<User> Users;
@@ -150,8 +303,10 @@ int main()
 		cout << "File doesn't open." << endl;
 	}
 
-	ShowUsersInfo(Users);
-	AddAllUsersFile(Users, fileName);
+	string clientUsername = "";
+	string clientPassword = "";
+
+	StartMenu(Users, clientUsername, clientPassword, fileName);
 
 	file.close();
 	return 0;
