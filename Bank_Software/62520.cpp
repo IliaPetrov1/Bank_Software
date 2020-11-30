@@ -3,22 +3,23 @@
 #include <vector>
 #include <fstream>
 #include <regex>
+#include <sstream>
 
 using namespace std;
 
 //Class User with its functions get/set for username/password
-class User 
+class User
 {
-	public:
-		void set_username(string text);
-		string get_username(void);
+public:
+	void set_username(string text);
+	string get_username(void);
 
-		void set_password(string text);
-		string get_password(void);
-	
-	private: 
-		string username;
-		string password;
+	void set_password(string text);
+	string get_password(void);
+
+private:
+	string username;
+	string password;
 };
 void User::set_username(string text)
 {
@@ -37,8 +38,36 @@ string User::get_password(void)
 	return password;
 }
 
+//Convert to Hex
+string ToHex(unsigned int input)
+{
+	string hexHashedString;
+
+	stringstream hexStream;
+	hexStream << hex << input;
+	hexHashedString = hexStream.str();
+	transform(hexHashedString.begin(), hexHashedString.end(), hexHashedString.begin(), ::toupper);
+
+	return hexHashedString;
+}
+//Hashing password
+string ToHash(string input)
+{
+	string hasedPassword;
+	unsigned int specNumber = 421312;
+	unsigned int hash = 0;
+
+	for (int i = 0; i < input.size(); i++)
+	{
+		hash = hash ^ (input[i]);
+		hash = hash * specNumber;
+	}
+	hasedPassword = ToHex(hash);
+
+	return hasedPassword;
+}
 //Create a user
-void CreateUser(vector<User> &Users, string username, string password)
+void CreateUser(vector<User>& Users, string username, string password)
 {
 	User newUser;
 	newUser.set_username(username);
@@ -84,9 +113,9 @@ void AddAllUsersFile(vector<User> Users, string fileName)
 	{
 		if (file.is_open())
 		{
-			for (User user : Users)
+			for (int i = 0; i < Users.size(); i++)
 			{
-				AddUserFile(user, fileName);
+				file << "username:" + Users[i].get_username() + "_password:" + Users[i].get_password() << endl;
 			}
 		}
 	}
