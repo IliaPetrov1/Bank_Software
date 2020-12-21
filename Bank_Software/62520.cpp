@@ -4,8 +4,8 @@
 #include <map>
 #include <fstream>
 #include <regex>
-#include <sstream>
-#include <cstdlib>
+//#include <sstream>
+//#include <cstdlib>
 
 using namespace std;
 
@@ -94,7 +94,6 @@ string GetPasswordRegex(string userInfo)
 void ReadFileUsernamesPasswords(vector<User>& Users, string fileName)
 {
 	ifstream file(fileName);
-
 	if (file.is_open())
 	{
 		string infoLine;
@@ -144,15 +143,6 @@ void AddUserFileUsernamesFinance(string username, string fileName)
 	}
 
 	file.close();
-}
-
-//Showing username and password of all users(debug)
-void ShowUsersUsernamePassword(vector<User> Users)
-{
-	for (auto user : Users)
-	{
-		cout << user.get_username() << " " << user.get_password() << endl;
-	}
 }
 
 //Start Menu
@@ -216,7 +206,7 @@ void LogIn(vector<User> Users, string& clientUsername, string& clientPassword)
 	clientUsername = username;
 	clientPassword = password;
 
-	system("cls");
+	//system("cls");
 	cout << "You have successfully logged in!" << endl;
 	cout << endl;
 }
@@ -249,10 +239,10 @@ void Register(vector<User> Users, string& clientUsername, string& clientPassword
 	thisUser.set_username(clientUsername);
 	thisUser.set_password(clientPassword);
 
-	AddUserFileUsernamesPasswords(thisUser, fileNameUsernamesPasswords);
 	CreateUser(Users, thisUser.get_username(), thisUser.get_password());
+	AddUserFileUsernamesPasswords(thisUser, fileNameUsernamesPasswords);
 
-	system("cls");
+	//system("cls");
 	cout << "You have successfully registered!" << endl;
 	cout << endl;
 }
@@ -264,7 +254,7 @@ void Quit(vector<User> Users, string fileName)
 }
 void StartMenu(vector<User> Users, string& clientUsername, string& clientPassword, string fileNameUsernamesPasswords)
 {
-	system("cls");
+	//system("cls");
 
 	cout << "Hello to FMI Bank!" << endl;
 	cout << endl;
@@ -302,21 +292,32 @@ void StartMenu(vector<User> Users, string& clientUsername, string& clientPasswor
 
 //UserMenu
 
+
+//Debug Tools
+//Showing username and password of all users
+void ShowUsersUsernamePassword(vector<User> Users)
+{
+	for (auto user : Users)
+	{
+		cout << user.get_username() << " " << user.get_password() << endl;
+	}
+}
+
 int main()
 {
 	vector<User> Users;
 	map<string, double> UsernamesAndFinance;
 
 	string fileInfo;
-	string fileNameUsernamesPasswords = "users.txt";
-	string fileNameUsernamesFinance = "users_finance.txt";
+	string const fileNameUsernamesPasswords = "users.txt";
+	string const fileNameUsernamesFinance = "users_finance.txt";
 
 	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
 
 	string clientUsername = "";
 	string clientPassword = "";
+
 	StartMenu(Users, clientUsername, clientPassword, fileNameUsernamesPasswords);
 	
-
 	return 0;
 }
