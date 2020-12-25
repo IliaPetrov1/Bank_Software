@@ -4,6 +4,7 @@
 #include <map>
 #include <fstream>
 #include <regex>
+#include <iomanip>
 
 using namespace std;
 
@@ -203,7 +204,7 @@ void AddUserFileUsernamesFinance(string username, double finance, string fileNam
 
 	if (file.is_open())
 	{
-		file << "username:" + username + "_finance:" << finance << endl;
+		file << "username:" + username + "_finance:" << fixed << setprecision(2) << finance << endl;
 	}
 	else
 	{
@@ -312,7 +313,7 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string 
 	clientPassword = password;
 	clientFinance = UsernamesAndFinance[clientUsername];
 
-	//system("cls");
+	system("cls");
 	cout << "You have successfully logged in!" << endl;
 }
 void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
@@ -348,7 +349,7 @@ void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 	AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
 	AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
 
-	//system("cls");
+	system("cls");
 	cout << "You have successfully registered!" << endl;
 }
 void Quit(vector<User> Users, string fileName)
@@ -359,7 +360,7 @@ void Quit(vector<User> Users, string fileName)
 }
 void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance,string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	//system("cls");
+	system("cls");
 
 	cout << "Hello to FMI Bank!" << endl;
 	cout << endl;
@@ -419,29 +420,44 @@ void CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 
 	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 }
-void Deposit()
+void Deposit(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
+{
+	cout << "How much money do you want to deposit?" << endl;
+	double deposit;
+
+	cin >> deposit;
+
+	while (deposit * 100 - (int)(deposit * 100) != 0)
+	{
+		cout << "Deposit is with more than 2 digits after the comma, try again: ";
+		cin >> deposit;
+	}
+
+	clientFinance += deposit;
+
+	UsernamesAndFinance[clientUsername] = clientFinance;
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+}
+void Logout(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+{
+	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+}
+void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 
 }
-void Logout()
-{
-
-}
-void Transfer()
-{
-
-}
-void Withdraw()
+void Withdraw(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 
 }
 void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	//system("cls");
+	system("cls");
 	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
 	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 
-	cout << "You have " + to_string(UsernamesAndFinance[clientUsername]) + "BGN. Choose one of the following options:" << endl;
+	cout << "You have " << fixed << setprecision(2) << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
 	cout << "C - cancel account" << endl;
 	cout << "D - deposit" << endl;
 	cout << "L - logout" << endl;
@@ -464,22 +480,26 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 	if (clientOption == "C")
 	{
 		CancelAcc(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "D")
 	{
-		Deposit();
+		Deposit(UsernamesAndFinance, clientUsername, clientFinance, fileNameUsernamesFinance);
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "L")
 	{
-		Logout();
+		Logout(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "T")
 	{
-		Transfer();
+		Transfer(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "W")
 	{
-		Withdraw();
+		Withdraw(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 
 	AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
