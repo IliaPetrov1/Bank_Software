@@ -4,8 +4,6 @@
 #include <map>
 #include <fstream>
 #include <regex>
-//#include <sstream>
-//#include <cstdlib>
 
 using namespace std;
 
@@ -40,15 +38,32 @@ string User::get_password(void)
 	return password;
 }
 
-//Add and delete user info to vector Users or to map UsernamesAndSums
-void CreateUser(vector<User>& Users, string username, string password)
+//Debug Tools
+//Showing username, password and finance of all users
+void ShowUsersUsernamePassword(vector<User> Users)
+{
+	for (auto user : Users)
+	{
+		cout << user.get_username() << " " << user.get_password() << endl;
+	}
+}
+void ShowUsersUsernameFinance(map<string, double> UsernamesAndFinance)
+{
+	for (auto user : UsernamesAndFinance)
+	{
+		cout << user.first << " " << user.second << endl;
+	}
+}
+
+//Add and delete user info 
+void CreateUser(vector<User> &Users, string username, string password)
 {
 	User newUser;
 	newUser.set_username(username);
 	newUser.set_password(password);
 	Users.push_back(newUser);
 }
-void DeleteUser(vector<User>& Users, string username, string password)
+void DeleteUser(vector<User> &Users, string username, string password)
 {
 	User newUser;
 	newUser.set_username(username);
@@ -66,9 +81,19 @@ void DeleteUser(vector<User>& Users, string username, string password)
 
 	Users.erase(Users.begin() + indexUser);
 }
+void CreateBankFinance(map<string, double> &UsernamesAndFinance, string username, double finance)
+{
+	UsernamesAndFinance.insert(pair<string, double>(username, finance));
+}
+void DeleteBankFinance(map<string, double> &UsernamesAndFinance, string username)
+{
+	map<string, double>::iterator element;
+	element = UsernamesAndFinance.find(username);
+	UsernamesAndFinance.erase(element);
+}
 
-//Extracting usernames and passwords with regexs
-string GetUsernameRegex(string userInfo)
+//Extracting usernames, passwords and finance with regexs
+string GetUsernameRegexFileUsernamesPasswords(string userInfo)
 {
 	smatch match;
 	const string REG_STRING = "(?=username:).+(?=_password:)";
@@ -78,7 +103,7 @@ string GetUsernameRegex(string userInfo)
 	string username = match.str().substr(9, match.size() - 9);
 	return username;
 }
-string GetPasswordRegex(string userInfo)
+string GetPasswordRegexFileUsernamesPasswords(string userInfo)
 {
 	smatch match;
 	const string REG_STRING = "(?=_password:).+";
@@ -89,19 +114,42 @@ string GetPasswordRegex(string userInfo)
 
 	return password;
 }
+string GetUsernameRegexFileUsernamesFinance(string userInfo)
+{
+	smatch match;
+	const string REG_STRING = "(?=username:).+(?=_finance:)";
+	regex reg(REG_STRING);
+	regex_search(userInfo, match, reg);
+
+	string username = match.str().substr(9, match.size() - 9);
+	return username;
+}
+double GetFinanceRegexFileUsernamesFinance(string userInfo)
+{
+	smatch match;
+	const string REG_STRING = "(?=_finance:).+";
+	regex reg(REG_STRING);
+	regex_search(userInfo, match, reg);
+
+	string financeStr = match.str().substr(9, match.size() - 10);
+	double finance = stod(financeStr);
+
+	return finance;
+}
 
 //Functions for getting information and writing in .txt files
-void ReadFileUsernamesPasswords(vector<User>& Users, string fileName)
+void ReadFileUsernamesPasswords(vector<User> &Users, string fileName)
 {
 	ifstream file(fileName);
 	if (file.is_open())
 	{
+		Users.clear();
 		string infoLine;
 
 		while (getline(file, infoLine))
 		{
-			string userUsername = GetUsernameRegex(infoLine);
-			string userPassword = GetPasswordRegex(infoLine);
+			string userUsername = GetUsernameRegexFileUsernamesPasswords(infoLine);
+			string userPassword = GetPasswordRegexFileUsernamesPasswords(infoLine);
 			CreateUser(Users, userUsername, userPassword);
 		}
 	}
@@ -112,14 +160,34 @@ void ReadFileUsernamesPasswords(vector<User>& Users, string fileName)
 
 	file.close();
 }
-void AddUserFileUsernamesPasswords(User user, string fileName)
+void ReadFileUsernamesFinance(map<string, double> &UsernamesAndFinance, string fileName)
+{
+	ifstream file(fileName);
+	if (file.is_open())
+	{
+		UsernamesAndFinance.clear();
+		string infoLine;
+
+		while (getline(file, infoLine))
+		{
+			string userUsername = GetUsernameRegexFileUsernamesFinance(infoLine);
+			double userFinance = GetFinanceRegexFileUsernamesFinance(infoLine);
+			CreateBankFinance(UsernamesAndFinance, userUsername, userFinance);
+		}
+	}
+	else
+	{
+		cout << "Error with open of file " + fileName + "! (function ReadFileUsernamesPasswords)";
+	}
+
+	file.close();
+}
+void AddUserFileUsernamesPasswords(string username, string password, string fileName)
 {
 	ofstream file(fileName, ios::app);
 
 	if (file.is_open())
 	{
-		string username = user.get_username();
-		string password = user.get_password();
 		file << "username:" + username + "_password:" + password << endl;
 	}
 	else
@@ -129,17 +197,54 @@ void AddUserFileUsernamesPasswords(User user, string fileName)
 
 	file.close();
 }
-void AddUserFileUsernamesFinance(string username, string fileName)
+void AddUserFileUsernamesFinance(string username, double finance, string fileName)
 {
 	ofstream file(fileName, ios::app);
 
 	if (file.is_open())
 	{
-		file << username + " 0" << endl;
+		file << "username:" + username + "_finance:" << finance << endl;
 	}
 	else
 	{
 		cout << "Error with open of file " + fileName + "! (function AddUserFileUsernamesFinance)";
+	}
+
+	file.close();
+}
+void AddAllUserFileUsernamesPasswords(vector<User> Users, string fileName)
+{
+	ofstream file(fileName, ios::trunc);
+
+	if (file.is_open())
+	{
+		for (auto user : Users)
+		{
+			file << "username:" + user.get_username() + "_password:" + user.get_password() << endl;
+		}
+		
+	}
+	else
+	{
+		cout << "Error with open of file " + fileName + "! (function AddAllUserFileUsernamesPasswords)";
+	}
+
+	file.close();
+}
+void AddAllUserFileUsernamesFinance(map<string, double> UsernamesAndFinance, string fileName)
+{
+	ofstream file(fileName, ios::trunc);
+
+	if (file.is_open())
+	{
+		for (auto user : UsernamesAndFinance)
+		{
+			file << "username:" + user.first + "_finance:" << user.second << endl;
+		}
+	}
+	else
+	{
+		cout << "Error with open of file " + fileName + "! (function AddAllUserFileUsernamesPasswords)";
 	}
 
 	file.close();
@@ -161,7 +266,7 @@ bool IsThisAccInUsers(vector<User> Users, string username)
 
 	return answ;
 }
-void LogIn(vector<User> Users, string& clientUsername, string& clientPassword)
+void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance)
 {
 	string username = "";
 	string password = "";
@@ -205,12 +310,12 @@ void LogIn(vector<User> Users, string& clientUsername, string& clientPassword)
 
 	clientUsername = username;
 	clientPassword = password;
+	clientFinance = UsernamesAndFinance[clientUsername];
 
 	//system("cls");
 	cout << "You have successfully logged in!" << endl;
-	cout << endl;
 }
-void Register(vector<User> Users, string& clientUsername, string& clientPassword, string fileNameUsernamesPasswords)
+void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	string username = "";
 	string password = "";
@@ -235,16 +340,16 @@ void Register(vector<User> Users, string& clientUsername, string& clientPassword
 
 	clientUsername = username;
 	clientPassword = password;
+	clientFinance = 0;
 
 	thisUser.set_username(clientUsername);
 	thisUser.set_password(clientPassword);
 
-	CreateUser(Users, thisUser.get_username(), thisUser.get_password());
-	AddUserFileUsernamesPasswords(thisUser, fileNameUsernamesPasswords);
+	AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
+	AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
 
 	//system("cls");
 	cout << "You have successfully registered!" << endl;
-	cout << endl;
 }
 void Quit(vector<User> Users, string fileName)
 {
@@ -252,7 +357,7 @@ void Quit(vector<User> Users, string fileName)
 	cout << "We at FMI Bank know you had many options to choose from, we thank you for choosing us!" << endl;
 	exit(EXIT_FAILURE);
 }
-void StartMenu(vector<User> Users, string& clientUsername, string& clientPassword, string fileNameUsernamesPasswords)
+void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance,string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	//system("cls");
 
@@ -278,11 +383,11 @@ void StartMenu(vector<User> Users, string& clientUsername, string& clientPasswor
 
 	if (clientOption == "L")
 	{
-		LogIn(Users, clientUsername, clientPassword);
+		LogIn(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance);
 	}
 	else if (clientOption == "R")
 	{
-		Register(Users, clientUsername, clientPassword, fileNameUsernamesPasswords);
+		Register(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "Q")
 	{
@@ -291,16 +396,94 @@ void StartMenu(vector<User> Users, string& clientUsername, string& clientPasswor
 }
 
 //UserMenu
-
-
-//Debug Tools
-//Showing username and password of all users
-void ShowUsersUsernamePassword(vector<User> Users)
+void CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	for (auto user : Users)
+	cout << "Enter password: ";
+	string password;
+	cin >> password;
+
+	if (password != clientPassword)
 	{
-		cout << user.get_username() << " " << user.get_password() << endl;
+		while (password != clientPassword)
+		{
+			cout << "You entered wrong password, try again: ";
+			cin >> password;
+		}
 	}
+
+	DeleteUser(Users, clientUsername, clientPassword);
+	DeleteBankFinance(UsernamesAndFinance, clientUsername);
+
+	AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+
+	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+}
+void Deposit()
+{
+
+}
+void Logout()
+{
+
+}
+void Transfer()
+{
+
+}
+void Withdraw()
+{
+
+}
+void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+{
+	//system("cls");
+	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+
+	cout << "You have " + to_string(UsernamesAndFinance[clientUsername]) + "BGN. Choose one of the following options:" << endl;
+	cout << "C - cancel account" << endl;
+	cout << "D - deposit" << endl;
+	cout << "L - logout" << endl;
+	cout << "T - transfer" << endl;
+	cout << "W - withdraw" << endl;
+
+	string clientOption;
+	cout << "Type here: ";
+	cin >> clientOption;
+
+	if (clientOption != "C" && clientOption != "D" && clientOption != "L" && clientOption != "T" && clientOption != "W")
+	{
+		while (clientOption != "C" && clientOption != "D" && clientOption != "L" && clientOption != "T" && clientOption != "W")
+		{
+			cout << "Sorry, but you have entered invalid input, please try again: ";
+			cin >> clientOption;
+		}
+	}
+
+	if (clientOption == "C")
+	{
+		CancelAcc(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+	}
+	else if (clientOption == "D")
+	{
+		Deposit();
+	}
+	else if (clientOption == "L")
+	{
+		Logout();
+	}
+	else if (clientOption == "T")
+	{
+		Transfer();
+	}
+	else if (clientOption == "W")
+	{
+		Withdraw();
+	}
+
+	AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
 
 int main()
@@ -313,11 +496,14 @@ int main()
 	string const fileNameUsernamesFinance = "users_finance.txt";
 
 	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 
 	string clientUsername = "";
 	string clientPassword = "";
+	double clientFinance = 0;
 
-	StartMenu(Users, clientUsername, clientPassword, fileNameUsernamesPasswords);
-	
+	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+	UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+
 	return 0;
 }
