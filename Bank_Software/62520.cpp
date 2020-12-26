@@ -5,6 +5,7 @@
 #include <fstream>
 #include <regex>
 #include <iomanip>
+#include <cmath>
 
 using namespace std;
 
@@ -397,8 +398,9 @@ void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 }
 
 //UserMenu
-void CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+bool CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
+	bool isAccCanceled = true;;
 	cout << "Enter password: ";
 	string password;
 	cin >> password;
@@ -412,13 +414,22 @@ void CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 		}
 	}
 
-	DeleteUser(Users, clientUsername, clientPassword);
-	DeleteBankFinance(UsernamesAndFinance, clientUsername);
+	if (clientFinance > 0)
+	{
+		cout << "This account has deposit and cannot be deleted!" << endl;
+		isAccCanceled = false;
+		return isAccCanceled;
+	}
+	else
+	{
+		DeleteUser(Users, clientUsername, clientPassword);
+		DeleteBankFinance(UsernamesAndFinance, clientUsername);
 
-	AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
-	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+		AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+		AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 
-	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		return isAccCanceled;
+	}
 }
 void Deposit(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
 {
@@ -447,9 +458,24 @@ void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 {
 
 }
-void Withdraw(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
 {
+	cout << "How much money do you want to withdraw: ";
+	double withdrawal;
 
+	cin >> withdrawal;
+
+	while (withdrawal * 100 - (int)(withdrawal * 100) != 0)
+	{
+		cout << "Withdrawal is with more than 2 digits after the comma, try again: ";
+		cin >> withdrawal;
+	}
+
+	clientFinance -= withdrawal;
+
+	UsernamesAndFinance[clientUsername] = clientFinance;
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
 void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
@@ -479,8 +505,16 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 
 	if (clientOption == "C")
 	{
-		CancelAcc(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
-		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		bool isAccCanceled = CancelAcc(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+
+		if (isAccCanceled == true)
+		{
+			StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		}
+		else
+		{
+			UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		}
 	}
 	else if (clientOption == "D")
 	{
@@ -498,7 +532,7 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 	}
 	else if (clientOption == "W")
 	{
-		Withdraw(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		Withdraw(UsernamesAndFinance, clientUsername, clientFinance, fileNameUsernamesFinance);
 		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 
