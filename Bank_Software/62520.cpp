@@ -4,7 +4,6 @@
 #include <map>
 #include <fstream>
 #include <regex>
-#include <iomanip>
 #include <cmath>
 
 using namespace std;
@@ -205,7 +204,7 @@ void AddUserFileUsernamesFinance(string username, double finance, string fileNam
 
 	if (file.is_open())
 	{
-		file << "username:" + username + "_finance:" << fixed << setprecision(2) << finance << endl;
+		file << "username:" + username + "_finance:" << finance << endl;
 	}
 	else
 	{
@@ -353,11 +352,11 @@ void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 	system("cls");
 	cout << "You have successfully registered!" << endl;
 }
-void Quit(vector<User> Users, string fileName)
+int Quit(vector<User> Users, string fileName)
 {
 	system("cls");
 	cout << "We at FMI Bank know you had many options to choose from, we thank you for choosing us!" << endl;
-	exit(EXIT_FAILURE);
+	return 0;
 }
 void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance,string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
@@ -454,9 +453,41 @@ void Logout(vector<User> Users, map<string, double>& UsernamesAndFinance, string
 {
 	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 }
-void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
 {
+	cout << "How much money do you want to transfer: ";
+	double transferedMoney;
 
+	cin >> transferedMoney;
+
+	while (transferedMoney * 100 - (int)(transferedMoney * 100) != 0)
+	{
+		cout << "Transfered money are with more than 2 digits after the comma, try again: ";
+		cin >> transferedMoney;
+	}
+
+	cout << "Transfer money to(enter the username of account you want transfer to): ";
+	string strangersUsername;
+
+	cin >> strangersUsername;
+
+	while (IsThisAccInUsers(Users, strangersUsername) == false)
+	{
+		cout << "You entered invalid username, try again: ";
+		cin >> strangersUsername;
+	}
+
+	//Adding to stranger acc
+	UsernamesAndFinance[strangersUsername] = clientFinance + transferedMoney;
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+
+	//Removing from user acc
+	clientFinance -= transferedMoney;
+
+	UsernamesAndFinance[clientUsername] = clientFinance;
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
 void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
 {
@@ -483,7 +514,7 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
 	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 
-	cout << "You have " << fixed << setprecision(2) << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
+	cout << "You have " << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
 	cout << "C - cancel account" << endl;
 	cout << "D - deposit" << endl;
 	cout << "L - logout" << endl;
@@ -527,7 +558,7 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 	}
 	else if (clientOption == "T")
 	{
-		Transfer(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		Transfer(Users, UsernamesAndFinance, clientUsername, clientFinance, fileNameUsernamesFinance);
 		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "W")
@@ -557,7 +588,11 @@ int main()
 	double clientFinance = 0;
 
 	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
-	UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 
+	while (true)
+	{
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+	}
+	
 	return 0;
 }
