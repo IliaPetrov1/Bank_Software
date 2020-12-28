@@ -20,24 +20,24 @@ public:
 	string get_password(void);
 
 private:
-	string username;
-	string password;
+	string _username;
+	string _password;
 };
 void User::set_username(string text)
 {
-	username = text;
+	_username = text;
 }
 string User::get_username(void)
 {
-	return username;
+	return _username;
 }
 void User::set_password(string text)
 {
-	password = text;
+	_password = text;
 }
 string User::get_password(void)
 {
-	return password;
+	return _password;
 }
 
 //DEBUG TOOLS
@@ -95,7 +95,7 @@ bool DoesUsernameContainsRightSymbs(string userInfo)
 
 	return answ;
 }
-void ValidateUsername(string userInfo)
+void ValidateUsername(string &userInfo)
 {
 	bool doesUsernameContainsRightSymbs = DoesUsernameContainsRightSymbs(userInfo);
 
@@ -104,7 +104,7 @@ void ValidateUsername(string userInfo)
 		//Writing if I have to add extra criteria for username
 		if (doesUsernameContainsRightSymbs == false)
 		{
-			cout << "Your username must contain only latin letters adn symbols, try again: " << endl;
+			cout << "Your username must contain only latin letters and symbols, try again: " << endl;
 		}
 
 		cin >> userInfo;
@@ -115,14 +115,19 @@ void ValidateUsername(string userInfo)
 //Validation password
 bool DoesPasswordContainsRightSymbs(string userInfo)
 {
-	bool answ = true;
+	bool ans = false;
 
 	smatch match;
-	const string REG_STRING = "^\\b[a-zA-Z0-9!@#$%^&*]+\\b$";
+	const string REG_STRING = "^[a-zA-Z0-9!@#$%^&*]+$";
 	regex reg(REG_STRING);
 	regex_search(userInfo, match, reg);
 
-	return answ;
+	if (match.str() != "")
+	{
+		ans = true;
+	}
+
+	return ans;
 }
 bool DoesPasswordContainsOneSmallLetter(string userInfo)
 {
@@ -169,7 +174,7 @@ bool DoesPasswordContainsSpecSymb(string userInfo)
 
 	return ans;
 }
-void ValidatePassword(string userInfo)
+void ValidatePassword(string &userInfo)
 {
 	int lenUserInfo = userInfo.length();
 	bool doesPasswordContainsRightSymbs = DoesPasswordContainsRightSymbs(userInfo);
@@ -181,23 +186,23 @@ void ValidatePassword(string userInfo)
 	{
 		if (lenUserInfo < 5)
 		{
-			cout << "Your password must be at least 5 symbols, try again: " << endl;
+			cout << "Your password must be at least 5 symbols, try again: ";
 		}
 		if (doesPasswordContainsRightSymbs == false)
 		{
-			cout << "Your password must contain only small and big latin letters, digits and symbols (!@#$%^&*), try again: " << endl;
+			cout << "Your password must contain only small and big latin letters, digits and symbols (!@#$%^&*), try again: ";
 		}
 		if (doesPasswordContainsOneSmallLetter == false)
 		{
-			cout << "Your password must contain at least 1 small letter, try again: " << endl;
+			cout << "Your password must contain at least 1 small letter, try again: ";
 		}
 		if (doesPasswordContainsOneBigLetter == false)
 		{
-			cout << "Your password must contain at least 1 big letter, try again: " << endl;
+			cout << "Your password must contain at least 1 big letter, try again: ";
 		}
 		if (doesPasswordContainsSpecSymb == false)
 		{
-			cout << "Your password must contain at least 1 symbol (!@#$%^&*) letter, try again: " << endl;
+			cout << "Your password must contain at least 1 symbol (!@#$%^&*) letter, try again: " ;
 		}
 
 		cin >> userInfo;
@@ -441,6 +446,9 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string 
 		}
 	}
 
+	/*cout << "User username: " << thisUser.get_username() << endl;
+	cout << "User password: " << thisUser.get_password() << endl;*/
+
 	while (IsThisAccInUsers(Users, username) == false || thisUser.get_password() != password)
 	{
 		if (IsThisAccInUsers(Users, username) == false)
@@ -468,7 +476,6 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string 
 	clientFinance = UsernamesAndFinance[clientUsername];
 
 	system("cls");
-	cout << "You have successfully logged in!" << endl;
 }
 void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
@@ -477,40 +484,95 @@ void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 
 	cout << "Enter your username: ";
 	cin >> username;
-	cout << "Enter your password: ";
-	cin >> password;
-	cout << endl;
-
 	ValidateUsername(username);
-	ValidatePassword(password);
 
-	User thisUser;
-
-	while (IsThisAccInUsers(Users, username) == true)
+	if (IsThisAccInUsers(Users, username) == true)
 	{
-		cout << "Someone else has already used this username, try again." << endl;
-		cout << "Enter your username: ";
-		cin >> username;
+		while (IsThisAccInUsers(Users, username) == true)
+		{
+			cout << "Someone else has already used this username, try again." << endl;
+
+			cout << "Enter your username: ";
+			cin >> username;
+			ValidateUsername(username);
+		}
+
 		cout << "Enter your password: ";
 		cin >> password;
-		cout << endl;
-
-		ValidateUsername(username);
 		ValidatePassword(password);
+
+		string confirmedPassword;
+		cout << "Confirm your password: ";
+		cin >> confirmedPassword;
+
+		if (password != confirmedPassword)
+		{
+			cout << "Confirmation of your password is not valid, enter your password again: " << endl;
+
+			while (password != confirmedPassword)
+			{
+				cout << "Enter your password: ";
+				cin >> password;
+				ValidatePassword(password);
+
+				string confirmedPassword;
+				cout << "Confirm your password: ";
+				cin >> confirmedPassword;
+
+				if (password == confirmedPassword)
+				{
+					break;
+				}
+			}
+		}
 	}
+	else
+	{
+		cout << "Enter your password: ";
+		cin >> password;
+		ValidatePassword(password);
 
-	clientUsername = username;
-	clientPassword = password;
-	clientFinance = 0;
+		string confirmedPassword;
+		cout << "Confirm your password: ";
+		cin >> confirmedPassword;
 
-	thisUser.set_username(clientUsername);
-	thisUser.set_password(clientPassword);
+		if (password != confirmedPassword)
+		{
+			cout << "Confirmation of your password is not valid, enter your password again: " << endl;
 
-	AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
-	AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
+			while (password != confirmedPassword)
+			{
+				cout << "Enter your password: ";
+				cin >> password;
+				ValidatePassword(password);
 
-	system("cls");
-	cout << "You have successfully registered!" << endl;
+				string confirmedPassword;
+				cout << "Confirm your password: ";
+				cin >> confirmedPassword;
+
+				if (password == confirmedPassword)
+				{
+					clientUsername = username;
+					clientPassword = password;
+					clientFinance = 0;
+
+					AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
+					AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
+
+					break;
+				}
+			}
+		}
+		else
+		{
+			clientUsername = username;
+			clientPassword = password;
+			clientFinance = 0;
+
+			AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
+			AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
+		}
+	}
 }
 void Quit(vector<User> Users, string fileName)
 {
@@ -518,18 +580,8 @@ void Quit(vector<User> Users, string fileName)
 	cout << "We at FMI Bank know you had many options to choose from, we thank you for choosing us!" << endl;
 	exit(EXIT_FAILURE);
 }
-void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance,string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void OptionsStartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	system("cls");
-
-	cout << "Hello to FMI Bank!" << endl;
-	cout << endl;
-	cout << "Select one of 3 options:" << endl;
-	cout << "L - log in" << endl;
-	cout << "R - register" << endl;
-	cout << "Q - quit" << endl;
-	cout << "Type here: ";
-
 	string clientOption;
 	cin >> clientOption;
 
@@ -544,6 +596,11 @@ void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 
 	if (clientOption == "L")
 	{
+		if (Users.size() == 0)
+		{
+			cout << "You cannot log in, because there is no account in database, try again: ";
+			OptionsStartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		}
 		LogIn(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance);
 	}
 	else if (clientOption == "R")
@@ -555,11 +612,45 @@ void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 		Quit(Users, fileNameUsernamesPasswords);
 	}
 }
+void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance,string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+{
+	system("cls");
+
+	cout << "Hello to FMI Bank!" << endl;
+	cout << endl;
+	cout << "Select one of 3 options:" << endl;
+	cout << "L - log in" << endl;
+	cout << "R - register" << endl;
+	cout << "Q - quit" << endl;
+	cout << "Type here: ";
+
+	OptionsStartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+}
 
 //USER MENU
+void RemoveDigitsAfterSecondSymAfterComma(double& money)
+{
+	string moneyStr = to_string(money);
+
+	int indexComma = 0;
+	for (char symb : moneyStr)
+	{
+		if (symb == '.' || symb == ',')
+		{
+			break;
+		}
+		else
+		{
+			indexComma++;
+		}
+	}
+
+	moneyStr = moneyStr.substr(0, indexComma + 3);
+	money = stod(moneyStr);
+}
 bool CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	bool isAccCanceled = true;;
+	bool isAccCanceled = true;
 	cout << "Enter password: ";
 	string password;
 	cin >> password;
@@ -597,18 +688,19 @@ void Deposit(map<string, double>& UsernamesAndFinance, string& clientUsername, d
 
 	cin >> deposit;
 
-	while (DoesNumberHasMoreThanTwoDigitsAfterComma(deposit) == false || IsNumberPositive(deposit) == false)
+	while (IsNumberPositive(deposit) == false)
 	{
 		if (IsNumberPositive(deposit) == false)
 		{
 			cout << "Deposit should be positive number, try again: ";
 		}
-		else if (DoesNumberHasMoreThanTwoDigitsAfterComma(deposit) == false)
-		{
-			cout << "Deposit is with more than 2 digits after the comma, try again: ";
-		}
 
 		cin >> deposit;
+	}
+	if (DoesNumberHasMoreThanTwoDigitsAfterComma(deposit) == false)
+	{
+		RemoveDigitsAfterSecondSymAfterComma(deposit);
+		cout << "dep:" << deposit << endl;
 	}
 
 	clientFinance += deposit;
@@ -630,22 +722,23 @@ void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 
 	cin >> transferedMoney;
 
-	while (DoesNumberHasMoreThanTwoDigitsAfterComma(transferedMoney) == false || IsNumberPositive(transferedMoney) == false || CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
+	while (IsNumberPositive(transferedMoney) == false || CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
 	{
 		if (IsNumberPositive(transferedMoney) == false)
 		{
 			cout << "Transfered money should be positive number, try again: ";
 		}
-		else if (DoesNumberHasMoreThanTwoDigitsAfterComma(transferedMoney) == false)
-		{
-			cout << "Transfered money is with more than 2 digits after the comma, try again: ";
-		}
+
 		else if (CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
 		{
 			cout << "You cannot transfer, because you will go over your overdraft limit: ";
 		}
 
 		cin >> transferedMoney;
+	}
+	if (DoesNumberHasMoreThanTwoDigitsAfterComma(transferedMoney) == false)
+	{
+		RemoveDigitsAfterSecondSymAfterComma(transferedMoney);
 	}
 
 	cout << "Transfered money to (enter the username of account you want transfer to): ";
@@ -679,22 +772,23 @@ void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, 
 
 	cin >> withdrawal;
 
-	while (DoesNumberHasMoreThanTwoDigitsAfterComma(withdrawal) == false || IsNumberPositive(withdrawal) == false || CanThisMoneyBeRemovedFromBankBalance(clientFinance, withdrawal, overdraft) == false)
+	while (IsNumberPositive(withdrawal) == false || CanThisMoneyBeRemovedFromBankBalance(clientFinance, withdrawal, overdraft) == false)
 	{
 		if (IsNumberPositive(withdrawal) == false)
 		{
 			cout << "Withdrawal should be positive number, try again: ";
 		}
-		else if (DoesNumberHasMoreThanTwoDigitsAfterComma(withdrawal) == false)
-		{
-			cout << "Withdrawal is with more than 2 digits after the comma, try again: ";
-		}
 		else if (CanThisMoneyBeRemovedFromBankBalance(clientFinance, withdrawal, overdraft) == false)
 		{
-			cout << "You cannot withdraw, because you will go over your overdraft limit: ";
+			cout << "You cannot withdraw, because you will go over your overdraft limit: " << endl;
+			cout << "How much money do you want to withdraw: ";
 		}
 
 		cin >> withdrawal;
+	}
+	if (DoesNumberHasMoreThanTwoDigitsAfterComma(withdrawal) == false)
+	{
+		RemoveDigitsAfterSecondSymAfterComma(withdrawal);
 	}
 
 	clientFinance -= withdrawal;
@@ -715,9 +809,9 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 	cout << "L - logout" << endl;
 	cout << "T - transfer" << endl;
 	cout << "W - withdraw" << endl;
+	cout << "Type here: ";
 
 	string clientOption;
-	cout << "Type here: ";
 	cin >> clientOption;
 
 	if (clientOption != "C" && clientOption != "D" && clientOption != "L" && clientOption != "T" && clientOption != "W")
