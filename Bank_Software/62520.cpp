@@ -1,3 +1,18 @@
+/**
+*
+* Solution to course project # 4
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2020/2021
+*
+* @author Ilia Petrov
+* @idnumber 62520
+* @compiler VC
+*
+* <file with all code>
+*
+*/
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -6,6 +21,7 @@
 #include <regex>
 #include <iomanip>
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 
@@ -43,6 +59,8 @@ string User::get_password(void)
 //FUNCTIONS
 void ShowUsersUsernamePassword(vector<User> Users);
 void ShowUsersUsernameFinance(map<string, double> UsernamesAndFinance);
+string ToHex(unsigned int input);
+string ToHash(string& userInfo);
 bool DoesNumberHasMoreThanTwoDigitsAfterComma(double number);
 bool IsNumberPositive(double number);
 bool CanThisMoneyBeRemovedFromBankBalance(double ownedMoney, double removedMoney, double overdraft);
@@ -69,18 +87,18 @@ void AddAllUserFileUsernamesPasswords(vector<User> Users, string fileName);
 void AddAllUserFileUsernamesFinance(map<string, double> UsernamesAndFinance, string fileName);
 bool IsThisAccInUsers(vector<User> Users, string username);
 void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance);
-void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void Register(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
 void Quit(vector<User> Users, string fileName);
-void OptionsStartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
-void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void OptionsStartMenu(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void StartMenu(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
 void RemoveDigitsAfterSecondSymAfterComma(double& money);
 bool CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
 void Deposit(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance);
 void Logout(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
 void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance);
 void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance);
-void OptionsUserMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
-void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void OptionsUserMenu(vector<User> &Users, map<string, double> &UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void UserMenu(vector<User>& Users, map<string, double> &UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
 
 int main()
 {
@@ -91,20 +109,20 @@ int main()
 	string const fileNameUsernamesPasswords = "users.txt";
 	string const fileNameUsernamesFinance = "users_finance.txt";
 
-	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
-	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
-
 	string clientUsername = "";
 	string clientPassword = "";
 	double clientFinance = 0;
 
 	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
-	UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 
-	while (true)
-	{
-		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
-	}
+	Users.clear();
+	Users.shrink_to_fit();
+	delete(&UsernamesAndFinance);
+	delete(&clientUsername);
+	delete(&clientPassword);
+	delete(&clientFinance);
+	delete(&fileNameUsernamesPasswords);
+	delete(&fileNameUsernamesFinance);
 
 	return 0;
 }
@@ -124,6 +142,32 @@ void ShowUsersUsernameFinance(map<string, double> UsernamesAndFinance)
 	{
 		cout << user.first << " " << user.second << endl;
 	}
+}
+
+//HASH FUNCTION
+string ToHex(unsigned int input)
+{
+	string hexHashedString;
+
+	stringstream hexStream;
+	hexStream << hex << input;
+	hexHashedString = hexStream.str();
+	transform(hexHashedString.begin(), hexHashedString.end(), hexHashedString.begin(), ::toupper);
+
+	return hexHashedString;
+}
+string ToHash(string& userInfo)
+{
+	unsigned long long int hash = 1;
+
+	for (int i = 0; i < userInfo.size(); i++)
+	{
+		hash = hash * (int)userInfo[i] * (i + 1);
+	}
+
+	userInfo = ToHex(hash);
+
+	return userInfo;
 }
 
 //VALIDATION
@@ -299,7 +343,8 @@ void DeleteUser(vector<User>& Users, string username, string password)
 	newUser.set_password(password);
 
 	int indexUser = 0;
-	for (int i = 0; i < Users.size(); i++)
+	int usersSize = Users.size();
+	for (int i = 0; i < usersSize; i++)
 	{
 		if (Users[i].get_username() == newUser.get_username())
 		{
@@ -483,8 +528,8 @@ void AddAllUserFileUsernamesFinance(map<string, double> UsernamesAndFinance, str
 bool IsThisAccInUsers(vector<User> Users, string username)
 {
 	bool answ = false;
-
-	for (int i = 0; i < Users.size(); i++)
+	int usersSize = Users.size();
+	for (int i = 0; i < usersSize; i++)
 	{
 		if (Users[i].get_username() == username)
 		{
@@ -505,8 +550,11 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string&
 	cin >> password;
 	cout << endl;
 
+	password = ToHash(password);
+
 	User thisUser;
-	for (int i = 0; i < Users.size(); i++)
+	int usersSize = Users.size();
+	for (int i = 0; i < usersSize; i++)
 	{
 		if (Users[i].get_username() == username)
 		{
@@ -515,8 +563,6 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string&
 		}
 	}
 
-	/*cout << "User username: " << thisUser.get_username() << endl;
-	cout << "User password: " << thisUser.get_password() << endl;*/
 
 	while (IsThisAccInUsers(Users, username) == false || thisUser.get_password() != password)
 	{
@@ -527,6 +573,7 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string&
 			cin >> username;
 			cout << "Enter your password: ";
 			cin >> password;
+			password = ToHash(password);
 			cout << endl;
 		}
 		else if (IsThisAccInUsers(Users, username) == true && thisUser.get_password() != password)
@@ -536,6 +583,7 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string&
 			cin >> username;
 			cout << "Enter your password: ";
 			cin >> password;
+			password = ToHash(password);
 			cout << endl;
 		}
 	}
@@ -546,7 +594,7 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string&
 
 	system("cls");
 }
-void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void Register(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	string username = "";
 	string password = "";
@@ -587,17 +635,31 @@ void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 	clientPassword = password;
 	clientFinance = 0;
 
+	clientPassword = ToHash(clientPassword);
+
 	AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
 	AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
 }
-void Quit(vector<User> Users, string fileName)
+void Quit(vector<User>& Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string &fileNameUsernamesPasswords, string &fileNameUsernamesFinance)
 {
 	system("cls");
 	cout << "We at FMI Bank know you had many options to choose from, we thank you for choosing us!" << endl;
 	exit(EXIT_FAILURE);
+
+	Users.clear();
+	Users.shrink_to_fit();
+	delete(&UsernamesAndFinance);
+	delete(&clientUsername);
+	delete(&clientPassword);
+	delete(&clientFinance);
+	delete(&fileNameUsernamesPasswords);
+	delete(&fileNameUsernamesFinance);
 }
-void OptionsStartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void OptionsStartMenu(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
+	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+
 	string clientOption;
 	cin >> clientOption;
 
@@ -618,17 +680,19 @@ void OptionsStartMenu(vector<User> Users, map<string, double>& UsernamesAndFinan
 			OptionsStartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 		}
 		LogIn(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance);
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "R")
 	{
 		Register(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 	else if (clientOption == "Q")
 	{
-		Quit(Users, fileNameUsernamesPasswords);
+		Quit(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 	}
 }
-void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void StartMenu(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	system("cls");
 
@@ -670,6 +734,7 @@ bool CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 	cout << "Enter password: ";
 	string password;
 	cin >> password;
+	password = ToHash(password);
 
 	if (password != clientPassword)
 	{
@@ -677,12 +742,13 @@ bool CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, str
 		{
 			cout << "You entered wrong password, try again: ";
 			cin >> password;
+			password = ToHash(password);
 		}
 	}
 
 	if (clientFinance > 0)
 	{
-		cout << "This account has deposit and cannot be deleted!" << endl;
+		//Account has deposit and cannot be deleted
 		isAccCanceled = false;
 		return isAccCanceled;
 	}
@@ -813,8 +879,11 @@ void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, 
 	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
-void OptionsUserMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void OptionsUserMenu(vector<User>& Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
+	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+
 	string clientOption;
 	cin >> clientOption;
 
@@ -871,11 +940,9 @@ void OptionsUserMenu(vector<User> Users, map<string, double>& UsernamesAndFinanc
 	AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
 	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
-void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void UserMenu(vector<User> &Users, map<string, double> &UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	system("cls");
-	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
-	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 
 	cout << "You have " << fixed << setprecision(2) << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
 	cout << "C - cancel account" << endl;
