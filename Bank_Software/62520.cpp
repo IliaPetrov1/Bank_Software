@@ -40,6 +40,75 @@ string User::get_password(void)
 	return _password;
 }
 
+//FUNCTIONS
+void ShowUsersUsernamePassword(vector<User> Users);
+void ShowUsersUsernameFinance(map<string, double> UsernamesAndFinance);
+bool DoesNumberHasMoreThanTwoDigitsAfterComma(double number);
+bool IsNumberPositive(double number);
+bool CanThisMoneyBeRemovedFromBankBalance(double ownedMoney, double removedMoney, double overdraft);
+bool DoesUsernameContainsRightSymbs(string userInfo);
+void ValidateUsername(string& userInfo);
+bool DoesPasswordContainsRightSymbs(string userInfo);
+bool DoesPasswordContainsOneSmallLetter(string userInfo);
+bool DoesPasswordContainsOneBigLetter(string userInfo);
+bool DoesPasswordContainsSpecSymb(string userInfo);
+void ValidatePassword(string& userInfo);
+void CreateUser(vector<User>& Users, string username, string password);
+void DeleteUser(vector<User>& Users, string username, string password);
+void CreateBankFinance(map<string, double>& UsernamesAndFinance, string username, double finance);
+void DeleteBankFinance(map<string, double>& UsernamesAndFinance, string username);
+string GetUsernameRegexFileUsernamesPasswords(string userInfo);
+string GetPasswordRegexFileUsernamesPasswords(string userInfo);
+string GetUsernameRegexFileUsernamesFinance(string userInfo);
+double GetFinanceRegexFileUsernamesFinance(string userInfo);
+void ReadFileUsernamesPasswords(vector<User>& Users, string fileName);
+void ReadFileUsernamesFinance(map<string, double>& UsernamesAndFinance, string fileName);
+void AddUserFileUsernamesPasswords(string username, string password, string fileName);
+void AddUserFileUsernamesFinance(string username, double finance, string fileName);
+void AddAllUserFileUsernamesPasswords(vector<User> Users, string fileName);
+void AddAllUserFileUsernamesFinance(map<string, double> UsernamesAndFinance, string fileName);
+bool IsThisAccInUsers(vector<User> Users, string username);
+void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance);
+void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void Quit(vector<User> Users, string fileName);
+void OptionsStartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void RemoveDigitsAfterSecondSymAfterComma(double& money);
+bool CancelAcc(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void Deposit(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance);
+void Logout(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void Transfer(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance);
+void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance);
+void OptionsUserMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance);
+
+int main()
+{
+	vector<User> Users;
+	map<string, double> UsernamesAndFinance;
+
+	string fileInfo;
+	string const fileNameUsernamesPasswords = "users.txt";
+	string const fileNameUsernamesFinance = "users_finance.txt";
+
+	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+
+	string clientUsername = "";
+	string clientPassword = "";
+	double clientFinance = 0;
+
+	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+	UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+
+	while (true)
+	{
+		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+	}
+
+	return 0;
+}
+
 //DEBUG TOOLS
 //Showing username, password and finance of all users
 void ShowUsersUsernamePassword(vector<User> Users)
@@ -95,7 +164,7 @@ bool DoesUsernameContainsRightSymbs(string userInfo)
 
 	return answ;
 }
-void ValidateUsername(string &userInfo)
+void ValidateUsername(string& userInfo)
 {
 	bool doesUsernameContainsRightSymbs = DoesUsernameContainsRightSymbs(userInfo);
 
@@ -110,7 +179,7 @@ void ValidateUsername(string &userInfo)
 		cin >> userInfo;
 		doesUsernameContainsRightSymbs = DoesUsernameContainsRightSymbs(userInfo);
 	}
-	
+
 }
 //Validation password
 bool DoesPasswordContainsRightSymbs(string userInfo)
@@ -174,14 +243,14 @@ bool DoesPasswordContainsSpecSymb(string userInfo)
 
 	return ans;
 }
-void ValidatePassword(string &userInfo)
+void ValidatePassword(string& userInfo)
 {
 	int lenUserInfo = userInfo.length();
 	bool doesPasswordContainsRightSymbs = DoesPasswordContainsRightSymbs(userInfo);
 	bool doesPasswordContainsOneSmallLetter = DoesPasswordContainsOneSmallLetter(userInfo);
 	bool doesPasswordContainsOneBigLetter = DoesPasswordContainsOneBigLetter(userInfo);
 	bool doesPasswordContainsSpecSymb = DoesPasswordContainsSpecSymb(userInfo);
-	
+
 	while (lenUserInfo < 5 || doesPasswordContainsRightSymbs == false || doesPasswordContainsOneSmallLetter == false || doesPasswordContainsOneBigLetter == false || doesPasswordContainsSpecSymb == false)
 	{
 		if (lenUserInfo < 5)
@@ -202,7 +271,7 @@ void ValidatePassword(string &userInfo)
 		}
 		if (doesPasswordContainsSpecSymb == false)
 		{
-			cout << "Your password must contain at least 1 symbol (!@#$%^&*) letter, try again: " ;
+			cout << "Your password must contain at least 1 symbol (!@#$%^&*) letter, try again: ";
 		}
 
 		cin >> userInfo;
@@ -216,14 +285,14 @@ void ValidatePassword(string &userInfo)
 }
 
 //ADD AND DELETE USER INFORMATION 
-void CreateUser(vector<User> &Users, string username, string password)
+void CreateUser(vector<User>& Users, string username, string password)
 {
 	User newUser;
 	newUser.set_username(username);
 	newUser.set_password(password);
 	Users.push_back(newUser);
 }
-void DeleteUser(vector<User> &Users, string username, string password)
+void DeleteUser(vector<User>& Users, string username, string password)
 {
 	User newUser;
 	newUser.set_username(username);
@@ -241,11 +310,11 @@ void DeleteUser(vector<User> &Users, string username, string password)
 
 	Users.erase(Users.begin() + indexUser);
 }
-void CreateBankFinance(map<string, double> &UsernamesAndFinance, string username, double finance)
+void CreateBankFinance(map<string, double>& UsernamesAndFinance, string username, double finance)
 {
 	UsernamesAndFinance.insert(pair<string, double>(username, finance));
 }
-void DeleteBankFinance(map<string, double> &UsernamesAndFinance, string username)
+void DeleteBankFinance(map<string, double>& UsernamesAndFinance, string username)
 {
 	map<string, double>::iterator element;
 	element = UsernamesAndFinance.find(username);
@@ -298,7 +367,7 @@ double GetFinanceRegexFileUsernamesFinance(string userInfo)
 }
 
 //FUNCTIONS FOR GETTING INFORMATION AND WRITING IN .TXT FILES
-void ReadFileUsernamesPasswords(vector<User> &Users, string fileName)
+void ReadFileUsernamesPasswords(vector<User>& Users, string fileName)
 {
 	ifstream file(fileName);
 	if (file.is_open())
@@ -320,7 +389,7 @@ void ReadFileUsernamesPasswords(vector<User> &Users, string fileName)
 
 	file.close();
 }
-void ReadFileUsernamesFinance(map<string, double> &UsernamesAndFinance, string fileName)
+void ReadFileUsernamesFinance(map<string, double>& UsernamesAndFinance, string fileName)
 {
 	ifstream file(fileName);
 	if (file.is_open())
@@ -382,7 +451,7 @@ void AddAllUserFileUsernamesPasswords(vector<User> Users, string fileName)
 		{
 			file << "username:" + user.get_username() + "_password:" + user.get_password() << endl;
 		}
-		
+
 	}
 	else
 	{
@@ -426,7 +495,7 @@ bool IsThisAccInUsers(vector<User> Users, string username)
 
 	return answ;
 }
-void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance)
+void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance)
 {
 	string username = "";
 	string password = "";
@@ -477,7 +546,7 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string 
 
 	system("cls");
 }
-void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	string username = "";
 	string password = "";
@@ -486,93 +555,40 @@ void Register(vector<User> Users, map<string, double>& UsernamesAndFinance, stri
 	cin >> username;
 	ValidateUsername(username);
 
-	if (IsThisAccInUsers(Users, username) == true)
+	while (IsThisAccInUsers(Users, username) == true)
 	{
-		while (IsThisAccInUsers(Users, username) == true)
-		{
-			cout << "Someone else has already used this username, try again." << endl;
+		cout << "Someone else has already used this username, try again." << endl;
 
-			cout << "Enter your username: ";
-			cin >> username;
-			ValidateUsername(username);
-		}
+		cout << "Enter your username: ";
+		cin >> username;
+		ValidateUsername(username);
+	}
 
+	cout << "Enter your password: ";
+	cin >> password;
+	ValidatePassword(password);
+
+	string confirmedPassword;
+	cout << "Confirm your password: ";
+	cin >> confirmedPassword;
+
+	while (password != confirmedPassword)
+	{
+		cout << "Confirmation of your password is not valid, enter your password again: " << endl;
 		cout << "Enter your password: ";
 		cin >> password;
 		ValidatePassword(password);
 
-		string confirmedPassword;
 		cout << "Confirm your password: ";
 		cin >> confirmedPassword;
-
-		if (password != confirmedPassword)
-		{
-			cout << "Confirmation of your password is not valid, enter your password again: " << endl;
-
-			while (password != confirmedPassword)
-			{
-				cout << "Enter your password: ";
-				cin >> password;
-				ValidatePassword(password);
-
-				string confirmedPassword;
-				cout << "Confirm your password: ";
-				cin >> confirmedPassword;
-
-				if (password == confirmedPassword)
-				{
-					break;
-				}
-			}
-		}
 	}
-	else
-	{
-		cout << "Enter your password: ";
-		cin >> password;
-		ValidatePassword(password);
 
-		string confirmedPassword;
-		cout << "Confirm your password: ";
-		cin >> confirmedPassword;
+	clientUsername = username;
+	clientPassword = password;
+	clientFinance = 0;
 
-		if (password != confirmedPassword)
-		{
-			cout << "Confirmation of your password is not valid, enter your password again: " << endl;
-
-			while (password != confirmedPassword)
-			{
-				cout << "Enter your password: ";
-				cin >> password;
-				ValidatePassword(password);
-
-				string confirmedPassword;
-				cout << "Confirm your password: ";
-				cin >> confirmedPassword;
-
-				if (password == confirmedPassword)
-				{
-					clientUsername = username;
-					clientPassword = password;
-					clientFinance = 0;
-
-					AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
-					AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
-
-					break;
-				}
-			}
-		}
-		else
-		{
-			clientUsername = username;
-			clientPassword = password;
-			clientFinance = 0;
-
-			AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
-			AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
-		}
-	}
+	AddUserFileUsernamesPasswords(clientUsername, clientPassword, fileNameUsernamesPasswords);
+	AddUserFileUsernamesFinance(clientUsername, clientFinance, fileNameUsernamesFinance);
 }
 void Quit(vector<User> Users, string fileName)
 {
@@ -612,7 +628,7 @@ void OptionsStartMenu(vector<User> Users, map<string, double>& UsernamesAndFinan
 		Quit(Users, fileNameUsernamesPasswords);
 	}
 }
-void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string &clientUsername, string &clientPassword, double &clientFinance,string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void StartMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
 	system("cls");
 
@@ -797,20 +813,8 @@ void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, 
 	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
-void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
+void OptionsUserMenu(vector<User> Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	system("cls");
-	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
-	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
-
-	cout << "You have " << fixed << setprecision(2) << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
-	cout << "C - cancel account" << endl;
-	cout << "D - deposit" << endl;
-	cout << "L - logout" << endl;
-	cout << "T - transfer" << endl;
-	cout << "W - withdraw" << endl;
-	cout << "Type here: ";
-
 	string clientOption;
 	cin >> clientOption;
 
@@ -852,36 +856,34 @@ void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, strin
 	}
 	else if (clientOption == "W")
 	{
-		Withdraw(UsernamesAndFinance, clientUsername, clientFinance, fileNameUsernamesFinance);
-		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		if (clientFinance == -10000)
+		{
+			//Cannot withdrow, because user will go over his overdraft limit
+			UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		}
+		else
+		{
+			Withdraw(UsernamesAndFinance, clientUsername, clientFinance, fileNameUsernamesFinance);
+			UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
+		}
 	}
 
 	AddAllUserFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
 	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
-
-int main()
+void UserMenu(vector<User> Users, map<string, double> UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	vector<User> Users;
-	map<string, double> UsernamesAndFinance;
-
-	string fileInfo;
-	string const fileNameUsernamesPasswords = "users.txt";
-	string const fileNameUsernamesFinance = "users_finance.txt";
-
+	system("cls");
 	ReadFileUsernamesPasswords(Users, fileNameUsernamesPasswords);
 	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 
-	string clientUsername = "";
-	string clientPassword = "";
-	double clientFinance = 0;
+	cout << "You have " << fixed << setprecision(2) << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
+	cout << "C - cancel account" << endl;
+	cout << "D - deposit" << endl;
+	cout << "L - logout" << endl;
+	cout << "T - transfer" << endl;
+	cout << "W - withdraw" << endl;
+	cout << "Type here: ";
 
-	StartMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
-
-	while (true)
-	{
-		UserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
-	}
-	
-	return 0;
+	OptionsUserMenu(Users, UsernamesAndFinance, clientUsername, clientPassword, clientFinance, fileNameUsernamesPasswords, fileNameUsernamesFinance);
 }
