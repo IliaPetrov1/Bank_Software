@@ -591,8 +591,6 @@ void LogIn(vector<User> Users, map<string, double>& UsernamesAndFinance, string&
 	clientUsername = username;
 	clientPassword = password;
 	clientFinance = UsernamesAndFinance[clientUsername];
-
-	system("cls");
 }
 void Register(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
@@ -642,7 +640,6 @@ void Register(vector<User> &Users, map<string, double>& UsernamesAndFinance, str
 }
 void Quit(vector<User>& Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string &fileNameUsernamesPasswords, string &fileNameUsernamesFinance)
 {
-	system("cls");
 	cout << "We at FMI Bank know you had many options to choose from, we thank you for choosing us!" << endl;
 	exit(EXIT_FAILURE);
 
@@ -694,7 +691,6 @@ void OptionsStartMenu(vector<User> &Users, map<string, double>& UsernamesAndFina
 }
 void StartMenu(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	system("cls");
 
 	cout << "Hello to FMI Bank!" << endl;
 	cout << endl;
@@ -942,8 +938,6 @@ void OptionsUserMenu(vector<User>& Users, map<string, double>& UsernamesAndFinan
 }
 void UserMenu(vector<User> &Users, map<string, double> &UsernamesAndFinance, string& clientUsername, string& clientPassword, double& clientFinance, string fileNameUsernamesPasswords, string fileNameUsernamesFinance)
 {
-	system("cls");
-
 	cout << "You have " << fixed << setprecision(2) << UsernamesAndFinance[clientUsername] << " BGN. Choose one of the following options:" << endl;
 	cout << "C - cancel account" << endl;
 	cout << "D - deposit" << endl;
