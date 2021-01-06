@@ -61,7 +61,7 @@ bool DoesUsernameContainsRightSymbs(string userInfo)
 	return answ;
 }
 
-void ValidateUsername(string userInfo)
+void ValidateUsername(string& userInfo)
 {
 	bool doesUsernameContainsRightSymbs = DoesUsernameContainsRightSymbs(userInfo);
 
@@ -145,7 +145,7 @@ bool DoesPasswordContainsSpecSymb(string userInfo)
 	return ans;
 }
 
-void ValidatePassword(string userInfo)
+void ValidatePassword(string& userInfo)
 {
 	int lenUserInfo = userInfo.length();
 	bool doesPasswordContainsRightSymbs = DoesPasswordContainsRightSymbs(userInfo);
@@ -185,3 +185,4 @@ void ValidatePassword(string userInfo)
 		doesPasswordContainsSpecSymb = DoesPasswordContainsSpecSymb(userInfo);
 	}
 }
+

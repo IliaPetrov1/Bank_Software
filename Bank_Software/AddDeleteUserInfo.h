@@ -23,17 +23,20 @@ using namespace std;
 //ADD AND DELETE USER INFORMATION 
 void CreateUser(vector<User>& Users, string username, string password)
 {
-	User newUser(username, password);
+	User newUser;
+	newUser.set_username(username);
+	newUser.set_password(password);
 	Users.push_back(newUser);
 }
 
 void DeleteUser(vector<User>& Users, string username, string password)
 {
-	User newUser(username, password);
+	User newUser;
+	newUser.set_username(username);
+	newUser.set_password(password);
 
 	int indexUser = 0;
 	int usersSize = Users.size();
-
 	for (int i = 0; i < usersSize; i++)
 	{
 		if (Users[i].get_username() == newUser.get_username())

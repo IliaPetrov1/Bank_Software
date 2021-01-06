@@ -32,13 +32,13 @@ string ToHex(unsigned long long int input)
 	return hexHashedString;
 }
 
-string ToHash(string userInfo)
+string ToHash(string& userInfo)
 {
 	unsigned long long int hash = 1;
 
-	for (unsigned long long int i = 0; i < userInfo.size(); i++)
+	for (int i = 0; i < userInfo.size(); i++)
 	{
-		hash = hash * (unsigned long long int)userInfo[i] * (i + 1);
+		hash = hash * (int)userInfo[i] * (i + 1);
 	}
 
 	userInfo = ToHex(hash);

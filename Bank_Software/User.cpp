@@ -16,12 +16,6 @@
 #include "User.h"
 
 //CONSTRUCTOR AND FUNCTIONS OF USER
-User::User(string username, string password)
-{
-	set_username(username);
-	set_password(password);
-}
-
 void User::set_username(string text)
 {
 	_username = text;

@@ -24,10 +24,9 @@ using namespace std;
 class User
 {
 public:
-	User(string username, string password);
-
 	void set_username(string text);
 	string get_username(void);
+
 	void set_password(string text);
 	string get_password(void);
 

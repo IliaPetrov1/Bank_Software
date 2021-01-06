@@ -101,7 +101,7 @@ void AddUserFileUsernamesFinance(string username, double finance, string fileNam
 	file.close();
 }
 
-void AddAllUserFileUsernamesPasswords(vector<User>& Users, string fileName)
+void AddAllUserFileUsernamesPasswords(vector<User> &Users, string fileName)
 {
 	ofstream file(fileName, ios::trunc);
 
@@ -121,7 +121,7 @@ void AddAllUserFileUsernamesPasswords(vector<User>& Users, string fileName)
 	file.close();
 }
 
-void AddAllUserFileUsernamesFinance(map<string, double>& UsernamesAndFinance, string fileName)
+void AddAllUserFileUsernamesFinance(map<string, double> &UsernamesAndFinance, string fileName)
 {
 	ofstream file(fileName, ios::trunc);
 

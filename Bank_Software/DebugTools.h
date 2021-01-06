@@ -22,7 +22,7 @@ using namespace std;
 
 //DEBUG TOOLS
 //Showing username, password and finance of all users
-void ShowUsersUsernamePassword(vector<User>& Users)
+void ShowUsersUsernamePassword(vector<User> &Users)
 {
 	for (auto user : Users)
 	{
