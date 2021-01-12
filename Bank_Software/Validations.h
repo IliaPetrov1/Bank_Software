@@ -157,23 +157,23 @@ void ValidatePassword(string& userInfo)
 	{
 		if (lenUserInfo < 5)
 		{
-			cout << "Your password must be at least 5 symbols, try again: ";
+			cout << "Your password must be at least 5 symbols, try again: " << endl;
 		}
 		if (doesPasswordContainsRightSymbs == false)
 		{
-			cout << "Your password must contain only small and big latin letters, digits and symbols (!@#$%^&*), try again: ";
+			cout << "Your password must contain only small and big latin letters, digits and symbols (!@#$%^&*), try again:" << endl;
 		}
 		if (doesPasswordContainsOneSmallLetter == false)
 		{
-			cout << "Your password must contain at least 1 small letter, try again: ";
+			cout << "Your password must contain at least 1 small letter, try again: " << endl;
 		}
 		if (doesPasswordContainsOneBigLetter == false)
 		{
-			cout << "Your password must contain at least 1 big letter, try again: ";
+			cout << "Your password must contain at least 1 big letter, try again: "<< endl;
 		}
 		if (doesPasswordContainsSpecSymb == false)
 		{
-			cout << "Your password must contain at least 1 symbol (!@#$%^&*) letter, try again: ";
+			cout << "Your password must contain at least 1 symbol (!@#$%^&*) letter, try again: " << endl;
 		}
 
 		cin >> userInfo;

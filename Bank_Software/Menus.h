@@ -289,7 +289,6 @@ void Deposit(map<string, double>& UsernamesAndFinance, string& clientUsername, d
 	if (DoesNumberHasMoreThanTwoDigitsAfterComma(deposit) == false)
 	{
 		RemoveDigitsAfterSecondSymAfterComma(deposit);
-		cout << "dep:" << deposit << endl;
 	}
 
 	clientFinance += deposit;
@@ -307,59 +306,42 @@ void Logout(vector<User>& Users, map<string, double>& UsernamesAndFinance, strin
 void Transfer(vector<User> &Users, map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
 {
 	double overdraft = 10000;
-
 	cout << "How much money do you want to transfer: ";
 	double transferedMoney;
-
 	cin >> transferedMoney;
-
-	if (Users.size() < 2)
+	while (IsNumberPositive(transferedMoney) == false || CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
 	{
-		cout << "There are not more users in datebase and you cannot transfer!" << endl;
+		if (IsNumberPositive(transferedMoney) == false)
+		{
+			cout << "Transfered money should be positive number, try again: ";
+		}
+		else if (CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
+		{
+			cout << "You cannot transfer, because you will go over your overdraft limit: ";
+		}
+		cin >> transferedMoney;
 	}
-	else
+	if (DoesNumberHasMoreThanTwoDigitsAfterComma(transferedMoney) == false)
 	{
-		while (IsNumberPositive(transferedMoney) == false || CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
-		{
-			if (IsNumberPositive(transferedMoney) == false)
-			{
-				cout << "Transfered money should be positive number, try again: ";
-			}
-
-			else if (CanThisMoneyBeRemovedFromBankBalance(clientFinance, transferedMoney, overdraft) == false)
-			{
-				cout << "You cannot transfer, because you will go over your overdraft limit: ";
-			}
-
-			cin >> transferedMoney;
-		}
-		if (DoesNumberHasMoreThanTwoDigitsAfterComma(transferedMoney) == false)
-		{
-			RemoveDigitsAfterSecondSymAfterComma(transferedMoney);
-		}
-
-		cout << "Transfered money to (enter the username of account you want transfer to): ";
-		string strangersUsername;
-
+		RemoveDigitsAfterSecondSymAfterComma(transferedMoney);
+	}
+	cout << "Transfered money to (enter the username of account you want transfer to): ";
+	string strangersUsername;
+	cin >> strangersUsername;
+	while (IsThisAccInUsers(Users, strangersUsername) == false)
+	{
+		cout << "You entered invalid username, try again: ";
 		cin >> strangersUsername;
-
-		while (IsThisAccInUsers(Users, strangersUsername) == false)
-		{
-			cout << "You entered invalid username, try again: ";
-			cin >> strangersUsername;
-		}
-
-		//Adding to stranger acc
-		UsernamesAndFinance[strangersUsername] += transferedMoney;
-		AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
-		ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
-
-		//Removing from user acc
-		clientFinance -= transferedMoney;
-		UsernamesAndFinance[clientUsername] = clientFinance;
-		AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
-		ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 	}
+	//Adding to stranger acc
+	UsernamesAndFinance[strangersUsername] += transferedMoney;
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	//Removing from user acc
+	clientFinance -= transferedMoney;
+	UsernamesAndFinance[clientUsername] = clientFinance;
+	AddAllUserFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
+	ReadFileUsernamesFinance(UsernamesAndFinance, fileNameUsernamesFinance);
 }
 
 void Withdraw(map<string, double>& UsernamesAndFinance, string& clientUsername, double& clientFinance, string fileNameUsernamesFinance)
